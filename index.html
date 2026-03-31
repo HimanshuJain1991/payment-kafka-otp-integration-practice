@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Razorpay Test Payment</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+    <h2>Razorpay Test Payment</h2>
+    <input type="number" id="amount" placeholder="Enter amount in INR" />
+    <button id="payBtn">Pay Now</button>
+
+    <p id="status"></p>
+
+    <script>
+        document.getElementById("payBtn").onclick = async function() {
+         let amount = parseInt(document.getElementById("amount").value);
+            if (!amount || amount <= 0) {
+                alert("Enter valid amount");
+                return;
+            }
+
+            try {
+                // 1️⃣ Call backend to create order
+                let res = await fetch(`http://localhost:8080/payment/create-order?amount=${amount}`, {
+                    method: 'POST'
+                });
+                let order = await res.json();
+
+                // 2️⃣ Setup Razorpay options
+                let options = {
+                    key: "rzp_test_SWDF6yHHVcE7du", // Replace with your Razorpay Test Key
+                    amount: order.amount, // amount in paise
+                    currency: order.currency,
+                    name: "HIMANSHU JAIN",
+                    description: "Test Payment",
+                    order_id: order.id, // Order ID from backend
+                    handler: async function(response) {
+                        // 3️⃣ Send data to backend for verification
+                        let verifyRes = await fetch('http://localhost:8080/payment/verify-payment', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature
+                            })
+                        });
+                        let result = await verifyRes.text();
+                        document.getElementById("status").innerText = result;
+                    },
+                    prefill: {
+                        name: "HIMANSHU JAIN",
+                        email: "himanshujain119@yahoo.com",
+                        contact: "9691969842"
+                    },
+                    theme: { color: "#3399cc" }
+                };
+
+                // 4️⃣ Open Razorpay Checkout
+                let rzp = new Razorpay(options);
+                rzp.open();
+
+            } catch (err) {
+                console.error(err);
+                alert("Error creating order. Check console.");
+            }
+        };
+    </script>
+</body>
+</html>

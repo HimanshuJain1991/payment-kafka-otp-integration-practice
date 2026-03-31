@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>OTP System</title>
+</head>
+<body>
+
+<h2>OTP Verification</h2>
+
+<input type="text" id="phone" placeholder="Enter Phone"><br><br> <button onclick="sendOtp()">Send OTP</button><br><br>
+
+<input type="text" id="otp" placeholder="Enter OTP"><br><br> <button onclick="verifyOtp()">Verify OTP</button>
+
+<p id="result"></p>
+
+<script>
+function sendOtp() {
+    let phone = document.getElementById("phone").value;
+
+    fetch(`http://localhost:8080/otp/send?phone=${phone}`, {
+        method: "POST"
+    })
+    .then(res => res.text())
+    .then(data => {
+        document.getElementById("result").innerText = data;
+    });
+}
+
+function verifyOtp() {
+    let phone = document.getElementById("phone").value;
+    let otp = document.getElementById("otp").value;
+
+    fetch(`http://localhost:8080/otp/verify?phone=${phone}&otp=${otp}`, {
+        method: "POST"
+    })
+    .then(res => res.text())
+    .then(data => {
+        document.getElementById("result").innerText = data;
+    });
+}
+</script>
+
+</body>
+</html>

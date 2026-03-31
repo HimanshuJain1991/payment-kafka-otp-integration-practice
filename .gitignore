@@ -1,0 +1,4 @@
+# Ignore sensitive files
+application.properties
+*.env
+Twilio-Data.txt
